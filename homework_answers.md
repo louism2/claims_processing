@@ -173,13 +173,13 @@ FROM (
 
 #### answer:
 
-To find the answer we first need to group all records in the dependents table by employee_id and count the number of occurrences of dependent_ids. We can then join this result set to the employees table. In the event that an employee has no dependents we'll substitute a value of zero. Once we have the count of dependets for all employees we can then average the dependent_counts column to get our answer.
-
 ```
  0.1429
 ```
 
 #### explanation:
+
+To find the answer we first need to group all records in the dependents table by employee_id and count the number of occurrences of dependent_ids. We can then join this result set to the employees table. In the event that an employee has no dependents we'll substitute a value of zero. Once we have the count of dependets for all employees we can then average the dependent_counts column to get our answer.
 
 ### 6. How many employees have no dependents?
 
