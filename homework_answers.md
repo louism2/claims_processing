@@ -43,7 +43,7 @@ The solution that I am most familiar with for creating a pool of workers is Amaz
 Given the data model provided for claims, employees and dependents it's clear that the data is relational in nature so we would ideally use a realtional database to store this data. However, I am not aware of any relational database cloud solutions that handle 100K writes per second. Both AWS Aurora and AWS RDS advertise "high throughput" but I'm seeing that people are sturggling to get more than 40K writes per second using either solution. Knowing this we have some other options to consider:
 
 1. Shard a relational database - By sharding the data we could logically split the data up across 3 RDS or Aurora instances which would allow for an upper performance bound of 120K writes per second. If choosing this solution we should make sure to store data that is most commonly accessed together on the same shard. Sharding by employee_id may be a good option here but I would need to more infomation on the access patterns for this data.
-2. Store the data in a higher throughput non-relational database - I have experience using AWS DynamoDB which, by default, handles up to 40K writes per second but this limit can be increased well above 100K writes per second. Dynamo tables are limited to a primary and secondary index so you would lose flexibility in how you can performantly query the data in the table. A non-relational solution like MongoDB that has better support for indexing but I'm not aware of any Mongo-as-a-service cloud solutions that offer 100K writes per second.
+2. Store the data in a higher throughput non-relational database - I have experience using AWS DynamoDB which, by default, handles up to 40K writes per second but this limit can be increased well above 100K writes per second. Dynamo tables are limited to a primary and secondary index so you would lose flexibility in how you can performantly query the data in the table. A non-relational solution like MongoDB has better support for indexing but I'm not aware of any Mongo-as-a-service cloud solutions that offer 100K writes per second.
 
 ## SQL Queries
 
@@ -173,7 +173,7 @@ FROM (
 
 #### answer:
 
-To find the answer we first need to group all records in the dependents table by employee_id and count the number of occurrences of dependent_ids. We can then join this result set to employees table. In the event that an employee had no dependents we'll substitute a value of zero. Once we have the count of dependets for all employees we can then average the dependent_counts column to get our answer.
+To find the answer we first need to group all records in the dependents table by employee_id and count the number of occurrences of dependent_ids. We can then join this result set to the employees table. In the event that an employee had no dependents we'll substitute a value of zero. Once we have the count of dependets for all employees we can then average the dependent_counts column to get our answer.
 
 ```
  0.1429
