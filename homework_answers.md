@@ -14,7 +14,7 @@ There are 4 main components to this system:
 
 For the purposes of this question we assume that this part of the system is producing the claim data and is capable of producing 100K messages per second. We will assume that each message contains information related to a single claim.
 
-#### Message Queues
+#### Message Queue
 
 We introduce a message queue in order to decouple message production from message consumption.
 
