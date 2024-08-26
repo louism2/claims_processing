@@ -264,9 +264,7 @@ Also according to the explanation in `dictionary.md` we know that: "If a claim i
 
 So we must query the claims table by both the claimant_id and by a claimant_type of retiree.
 
-### 10. What is the total claim amounts per "family" (i.e. an employee/retiree and their dependents)? For this report, we only want one row per
-
-    family, with: the employee_id as the family identifier, the employee's first and last name for reference, and the summed claim amounts
+### 10. What is the total claim amounts per "family" (i.e. an employee/retiree and their dependents)? For this report, we only want one row per family, with: the employee_id as the family identifier, the employee's first and last name for reference, and the summed claim amounts
 
 #### query:
 
