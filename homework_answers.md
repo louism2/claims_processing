@@ -4,7 +4,7 @@
 
 ### System Overview
 
-To scale this system one I would implement a messaging pattern in order to decouple claim consumption from production. This decoupling allows different parts of the system to scale independently of each other to achieve the desired throughput which, in this case, is 100K claims a second. Below is a diagram of what this system could look like:
+To scale this system I would implement a messaging pattern in order to decouple claim consumption from production. This decoupling allows different parts of the system to scale independently of each other to achieve the desired throughput which, in this case, is 100K claims a second. Below is a diagram of what this system could look like:
 
 ![messaging diagram](./system_design.png)
 

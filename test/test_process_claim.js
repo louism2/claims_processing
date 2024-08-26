@@ -94,12 +94,10 @@ function logAnyErrors(errorSource, callback) {
 describe("lib/process_claim", function () {
   before(async function () {
     db = mysql.createConnection({
-      host: "localhost",
-      //host: "db",
+      host: "db",
       user: "root",
       password: "tamagotchi",
-      //port: 3306,
-      port: 13306,
+      port: 3306,
       database: "claims",
       multipleStatements: true,
     });
