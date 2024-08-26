@@ -1,0 +1,40 @@
+---
+version: "3"
+
+services:
+  python-shell:
+    build:
+      context: .
+      dockerfile: Dockerfile.python
+    depends_on:
+      - db
+    volumes:
+      - ".:/app"
+    command:
+      - "/bin/bash"
+
+  javascript-shell:
+    build:
+      context: .
+      dockerfile: Dockerfile.javascript
+    depends_on:
+      - db
+    volumes:
+      - ".:/app"
+      - "nodemodules:/app/node_modules"
+    command:
+      - "/bin/bash"
+
+  db:
+    image: mysql:5.7
+    platform: linux/x86_64
+    environment:
+      MYSQL_ROOT_PASSWORD: tamagotchi
+      MYSQL_USER: dbuser
+      MYSQL_PASSWORD: dbpass
+      MYSQL_DATABASE: claims
+    ports:
+      - "13306:3306"
+
+volumes:
+  nodemodules:

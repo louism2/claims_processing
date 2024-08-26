@@ -1,0 +1,9 @@
+node_modules/
+.serverless/
+.nyc_output/
+coverage/
+.idea/
+*.iml
+#*
+*~
+__pycache__/

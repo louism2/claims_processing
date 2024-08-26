@@ -1,0 +1,8 @@
+SET FOREIGN_KEY_CHECKS=0;
+
+TRUNCATE employees;
+TRUNCATE dependents;
+TRUNCATE retirees;
+TRUNCATE claims;
+
+SET FOREIGN_KEY_CHECKS=1;
