@@ -14,6 +14,12 @@ db = mysql.createConnection({
   multipleStatements: true,
 });
 
+/**
+ * Intended to be called with a jsonl file from the command line:
+ *
+ *  Example:
+ *   node bin/load_claims.js < ./test/data/01.jsonl
+ */
 function main() {
   process.stdin.on("data", (data) => {
     const bufferStream = new stream.PassThrough();
