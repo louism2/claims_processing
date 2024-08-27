@@ -47,6 +47,13 @@ Given the data model provided for claims, employees and dependents it's clear th
 
 ## SQL Queries
 
+#### !!! ASSUMPTIONS !!!
+
+All queries are ran against the database state found by loading the following two files:
+
+- [data.sql](./schema/data.sql) file.
+- [01jsonl](./test/data/01.jsonl) file.
+
 ### 1. How many active employees are currently employed by Glorious Gumball?
 
 #### query:
@@ -60,7 +67,11 @@ WHERE emp_end_date IS NULL OR
 #### answer:
 
 ```
-4
++----------+
+| count(*) |
++----------+
+|        4 |
++----------+
 ```
 
 #### explanation:
@@ -115,7 +126,11 @@ SELECT count(*) FROM retirees WHERE term_date IS NOT NULL AND term_date < now();
 #### answer:
 
 ```
-1
++----------+
+| count(*) |
++----------+
+|        1 |
++----------+
 ```
 
 #### explanation:
@@ -174,7 +189,11 @@ FROM (
 #### answer:
 
 ```
- 0.1429
+ +--------------------------------------------+
+| avg(dependents_by_emp_id.dependent_counts) |
++--------------------------------------------+
+|                                     0.1429 |
++--------------------------------------------+
 ```
 
 #### explanation:
@@ -192,7 +211,11 @@ SELECT count(*) FROM employees WHERE employee_id NOT IN (SELECT employee_id FROM
 #### answer:
 
 ```
-6
++----------+
+| count(*) |
++----------+
+|        6 |
++----------+
 ```
 
 #### explanation:
@@ -213,7 +236,8 @@ SELECT claimant_type, count(*) FROM claims GROUP BY claimant_type;
 +---------------+----------+
 | claimant_type | count(*) |
 +---------------+----------+
-| retiree       |        1 |
+| employee      |        4 |
+| dependent     |        1 |
 +---------------+----------+
 ```
 
@@ -254,6 +278,12 @@ greater than or equal to 10.
 
 ```sql
 SELECT * FROM claims WHERE claimant_id = 100 AND claimant_type = 'retiree';
+```
+
+#### answer:
+
+```
+0
 ```
 
 #### explanation:
@@ -308,12 +338,12 @@ ON employees.employee_id = claim_totals.employee_id;
 +--------------------------------------+------------+-----------+--------------+
 | employee_id                          | first_name | last_name | total_claims |
 +--------------------------------------+------------+-----------+--------------+
-| 00000000-0000-0000-0000-000000000004 | Cindy      | Klaus     |            0 |
-| 00000000-0000-0000-0000-000000000006 | Adam       | Adams     |       620.21 |
-| 00000000-0000-0000-0000-000000000001 | Jacob      | Henry     |            0 |
-| 00000000-0000-0000-0000-000000000002 | Mary       | Henry     |            0 |
+| 00000000-0000-0000-0000-000000000001 | Jacob      | Henry     |       300.00 |
+| 00000000-0000-0000-0000-000000000002 | Mary       | Henry     |       340.00 |
 | 00000000-0000-0000-0000-000000000003 | Julie      | Santa     |            0 |
-| 00000000-0000-0000-0000-000000000005 | Mary       | Henry     |            0 |
+| 00000000-0000-0000-0000-000000000004 | Cindy      | Klaus     |       115.00 |
+| 00000000-0000-0000-0000-000000000005 | Mary       | Henry     |       250.00 |
+| 00000000-0000-0000-0000-000000000006 | Adam       | Adams     |            0 |
 | 00000000-0000-0000-0000-000000000007 | Violet     | Blue      |            0 |
 +--------------------------------------+------------+-----------+--------------+
 ```
@@ -344,7 +374,7 @@ SELECT
 +----------------------+-------------------------------+
 | total_for_dependents | dependent_percentage_of_total |
 +----------------------+-------------------------------+
-|                    0 |                             0 |
+|               115.00 |                      0.114428 |
 +----------------------+-------------------------------+
 ```
 
@@ -357,56 +387,49 @@ We can simply sum the claim_amount for all claims associated with dependents. Us
 #### query:
 
 ```sql
-SELECT top_claim.claimant_id, claims.claimant_type, top_claim.claim_count
+SELECT claimant_id, claimant_type, count(*) as claim_count
 FROM claims
-JOIN (
-  SELECT claimant_id, count(*) as claim_count
-  FROM claims
-  GROUP BY claimant_id
-  ORDER BY claim_count DESC
-  LIMIT 1
-) top_claim
-ON top_claim.claimant_id = claims.claimant_id;
+GROUP BY claimant_id, claimant_type
+ORDER BY claim_count DESC
+LIMIT 1;
 ```
 
 #### answer:
 
 ```
-+--------------------------------------+-------------+
-| employee_id                          | claim_count |
-+--------------------------------------+-------------+
-| 00000000-0000-0000-0000-000000000006 |           1 |
-+--------------------------------------+-------------+
++--------------------------------------+---------------+-------------+
+| claimant_id                          | claimant_type | claim_count |
++--------------------------------------+---------------+-------------+
+| 00000000-0000-0000-0000-000000000002 | employee      |           2 |
++--------------------------------------+---------------+-------------+
 ```
 
 #### explanation:
 
-We need to join the claimant data to the employee and dependents table
+To answer this we simply need to count the rows for all groupings of claimant_id + claimant_type, order by the largest count and then return the first record.
 
 ### 13. Who is the person (employee, retiree, or dependent) with the highest claim_amount in their claims, and what is that total claim_amount?
 
 #### query:
 
 ```sql
-SELECT employee_id,
-sum(claim_amount) as claim_amount
-FROM(
-  SELECT claim.claimant_id as employee_id, sum(claim.claim_amount) as claim_amount
-  FROM claims.claims as claim
-  WHERE claimant_type != 'dependent'
-  GROUP BY employee_id
-  UNION ALL
-  SELECT dependents.employee_id, dependent_claim.claim_amount
-  FROM claims.dependents as dependents
-  LEFT JOIN(
-    SELECT claim.claimant_id, sum(claim.claim_amount) as claim_amount
-    FROM claims.claims as claim
-    WHERE claimant_type = 'dependent'
-    GROUP BY claim.claimant_id
-  ) as dependent_claim
-  ON dependents.dependent_id = dependent_claim.claimant_id
-) as claims
-GROUP BY employee_id
-ORDER BY claim_amount DESC
+SELECT claimant_id, claimant_type, sum(claim_amount) as total
+FROM claims
+GROUP BY claimant_id, claimant_type
+ORDER BY total DESC
 LIMIT 1;
 ```
+
+#### answer:
+
+```
++--------------------------------------+---------------+--------+
+| claimant_id                          | claimant_type | total  |
++--------------------------------------+---------------+--------+
+| 00000000-0000-0000-0000-000000000002 | employee      | 340.00 |
++--------------------------------------+---------------+--------+
+```
+
+#### explanation:
+
+To answer this we simply need to sum the claim_amounts for all groupings of claimant_id + claimant_type, order by the largest sum and then return the first record.
