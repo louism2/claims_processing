@@ -348,31 +348,25 @@ SELECT
 +----------------------+-------------------------------+
 ```
 
+#### explanation:
+
+We can simply sum the claim_amount for all claims associated with dependents. Using this sum we can then use it as the numerator in a divison operation where the denominator is the sum of all claims regradless of claimant_type.
+
 ### 12. Who is the person (employee, retiree, or dependent) with the highest number of claims, and how many claims do they have?
 
 #### query:
 
 ```sql
-SELECT employee_id,
-claim_count
-FROM(
-  SELECT claim.claimant_id as employee_id, count(*) as claim_count
-  FROM claims.claims as claim
-  WHERE claimant_type != 'dependent'
-  GROUP BY employee_id
-  UNION ALL
-  SELECT dependents.employee_id, dependent_claim.claim_count
-  FROM claims.dependents as dependents
-  LEFT JOIN(
-    SELECT claim.claimant_id, count(*) as claim_count
-    FROM claims.claims as claim
-    WHERE claimant_type = 'dependent'
-    GROUP BY claim.claimant_id
-  ) as dependent_claim
-  ON dependents.dependent_id = dependent_claim.claimant_id
-) as claims
-ORDER BY claim_count DESC
-LIMIT 1;
+SELECT top_claim.claimant_id, claims.claimant_type, top_claim.claim_count
+FROM claims
+JOIN (
+  SELECT claimant_id, count(*) as claim_count
+  FROM claims
+  GROUP BY claimant_id
+  ORDER BY claim_count DESC
+  LIMIT 1
+) top_claim
+ON top_claim.claimant_id = claims.claimant_id;
 ```
 
 #### answer:
@@ -386,6 +380,8 @@ LIMIT 1;
 ```
 
 #### explanation:
+
+We need to join the claimant data to the employee and dependents table
 
 ### 13. Who is the person (employee, retiree, or dependent) with the highest claim_amount in their claims, and what is that total claim_amount?
 

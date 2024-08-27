@@ -2,45 +2,45 @@
 
 const { processClaim } = require("../lib/process_claim.js");
 const mysql = require("mysql");
+const readline = require("readline");
+const stream = require("stream");
 
 db = mysql.createConnection({
-  host: "db",
+  // host: "db",
+  // port: 3306,
+  host: "localhost",
+  port: 13306,
   user: "root",
   password: "tamagotchi",
-  port: 3306,
   database: "claims",
   multipleStatements: true,
 });
 
 function main() {
-  console.log(
-    '\n Paste claim data or type "exit" to exit the application \n\n'
-  );
-  console.log(
-    ' Example: {"ssn_suffix":"0121","last_name":"Klaus","first_name":"Cindy","date_of_birth":"1988-02-28T00:00:00.000Z","claim_date":"2021-12-26T00:00:00.000Z","claim_amount":100.01} \n'
-  );
-
   process.stdin.on("data", (data) => {
-    const input = data.toString();
+    const bufferStream = new stream.PassThrough();
+    bufferStream.end(data);
 
-    if (input === "exit") {
-      console.log("Exiting...");
-      process.exit();
-    }
+    var rl = readline.createInterface({
+      input: bufferStream,
+    });
 
-    const parsedInput = JSON.parse(input);
+    rl.on("line", (line) => {
+      const parsedInput = JSON.parse(line);
 
-    parsedInput.date_of_birth = new Date(parsedInput.date_of_birth);
-    parsedInput.claim_date = new Date(parsedInput.claim_date);
+      parsedInput.date_of_birth = new Date(parsedInput.date_of_birth);
+      parsedInput.claim_date = new Date(parsedInput.claim_date);
 
-    processClaim(db, parsedInput)
-      .then((res) => {
-        console.log("\n Successfully inserted claim into database \n");
-      })
-      .catch((err) => {
-        console.log("\n !!! Error inserting claim into database !!! \n");
-        console.log(err + "\n");
-      });
+      const promise = processClaim(db, parsedInput)
+        .then(() => {
+          console.log("\n Successfully processed claim \n");
+        })
+        .catch((err) => {
+          console.log("\n !!! Error inserting claim into database !!! \n");
+          console.log(parsedInput);
+          console.log(err + "\n");
+        });
+    });
   });
 }
 
