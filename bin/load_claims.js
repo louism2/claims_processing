@@ -6,10 +6,8 @@ const readline = require("readline");
 const stream = require("stream");
 
 db = mysql.createConnection({
-  // host: "db",
-  // port: 3306,
-  host: "localhost",
-  port: 13306,
+  host: "db",
+  port: 3306,
   user: "root",
   password: "tamagotchi",
   database: "claims",
@@ -37,7 +35,6 @@ function main() {
         })
         .catch((err) => {
           console.log("\n !!! Error inserting claim into database !!! \n");
-          console.log(parsedInput);
           console.log(err + "\n");
         });
     });
